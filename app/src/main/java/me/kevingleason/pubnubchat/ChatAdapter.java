@@ -87,7 +87,8 @@ public class ChatAdapter extends ArrayAdapter<ChatMessage> {
      * @param chatMsgs Messages to be added
      */
     public void setMessages(List<ChatMessage> chatMsgs){
-        this.values = chatMsgs;
+        this.values.clear();
+        this.values.addAll(chatMsgs);
         notifyDataSetChanged();
     }
 
