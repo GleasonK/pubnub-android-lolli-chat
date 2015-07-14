@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="AppTheme" parent="android:Theme.Material.Light">
+        <item name="android:colorPrimary">@color/pn_red</item>
+        <!--<item name="android:textColorPrimary">@color/white</item>-->
+    </style>
+
+
+    <style name="AppTheme.ChannelBar" parent="android:Theme.Material.Light">
+        <item name="android:elevation">2dp</item>
+        <item name="android:padding">10dp</item>
+        <item name="android:gravity">center</item>
+        <item name="android:background">@color/pn_blue</item>
+        <item name="android:textColor">@color/white</item>
+    </style>
+
+    <style name="AppTheme.MessageBar" parent="android:Theme.Material.Light">
+        <item name="android:elevation">2dp</item>
+    </style>
+
+</resources>
