@@ -38,7 +38,7 @@ Presence updates the number of users currently in a room, but when you want to s
 
 <img src="img/pubchat_state.png" width="400">
 
-The PubNub [State API](http://www.pubnub.com/docs/android-java/presence) allows you to define state data on the current channel. You can attach an object to your UUID that is accessible to anyone on the channel. This chat app uses the state API to attach login time to all online users' UUIDs. When an item in the list view, or an online user from the `here now` modal is clicked, their login time is read from the state of the channel and displayed in a `Toast` message.
+The PubNub [State API](http://www.pubnub.com/docs/android-java/presence) allows you to define state data on the current channel. You can attach an object to your UUID that is accessible to anyone on the channel. This chat app uses the state API to attach login time to all online users' UUIDs. When a user in the `here now` modal is clicked, their login time is read from the state of the channel and displayed in a `Toast` message.
 
 ### Push Notifications
 
