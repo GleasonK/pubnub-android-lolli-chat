@@ -45,3 +45,9 @@ The PubNub [State API](http://www.pubnub.com/docs/android-java/presence) allows 
 <img src="img/pubchat_push.png" width="400">
 
 PubNub makes push notifications easy. Simple enable push notifications on a channel and attach your GCM device ID to that channel and you are all set to receive pushes. When you tap a user's message in a chat room, a PubNub push notification is sent through GCM protocols to notify the user that you are waiting for them.
+
+### Make it your own!
+
+I encourage you to expand on this application! You could incorporate chat room features, perhaps using `hereNow` with an empty channel parameter to show users all active chat rooms and their occupancies. If you choose to do this, you will need your own Pub and Sub keys. To get these, [sign up for a PubNub account](http://www.pubnub.com/get-started/), it's quick and easy! You can find your unique PubNub keys in the [PubNub Developer Dashboard](https://admin.pubnub.com). Then, enable and customize the Presence, Storage & Playback, and Push Notification features. Once you have done this, simply replace the `String` values for `PUBLISH_KEY` and `SUBSCRIBE_KEY` in `me.kevingleason.pubnubchat.Constants`. 
+
+To enable Push Notifications, you will need to [register your app for GCM](https://developers.google.com/cloud-messaging/android/client). You will then receive an API Key which you can use to enable Push Notifications in the [PubNub Developer Dashboard](https://admin.pubnub.com), as well as a Sender ID which you should use to replace the `GCM_SENDER_ID` in the `me.kevingleason.pubnubchat.Constants` file.

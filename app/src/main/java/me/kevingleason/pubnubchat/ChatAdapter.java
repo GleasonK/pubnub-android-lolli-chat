@@ -96,9 +96,10 @@ public class ChatAdapter extends ArrayAdapter<ChatMessage> {
      * Handle users. Fill the onlineNow set with current users. Data is used to display a green dot
      *   next to users who are currently online.
      * @param user UUID of the user online.
-     * @param isOnline If the user is online or not.
+     * @param action The presence action
      */
-    public void userPresence(String user, boolean isOnline){
+    public void userPresence(String user, String action){
+        boolean isOnline = action.equals("join") || action.equals("state-change");
         if (!isOnline && this.onlineNow.contains(user))
             this.onlineNow.remove(user);
         else if (isOnline && !this.onlineNow.contains(user))

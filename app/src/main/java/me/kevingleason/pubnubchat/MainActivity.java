@@ -42,8 +42,15 @@ import java.util.List;
 import java.util.Set;
 
 import me.kevingleason.pubnubchat.adt.ChatMessage;
+import me.kevingleason.pubnubchat.callbacks.BasicCallback;
 
 /**
+ * Main Activity is where all the magic happens. To keep this demo simple I did not use fragment
+ *   views, simply a ListView that is populated by a custom adapter, ChatAdapter. If you want to
+ *   make this chat app your own, go to http://www.pubnub.com/get-started/ and replace the Pub/Sub
+ *   keys found in Constants.java, then be sure to enable Storage & Playback, Presence, and Push.
+ *   For all features to work, you will also need to Register for GCM Messaging and update your
+ *   sender ID as well.
  * Sample data to test from console:
  * {"type":"groupMessage","data":{"chatUser":"Dev","chatMsg":"Hello World!","chatTime":1436642192966}}
  *
@@ -57,7 +64,6 @@ public class MainActivity extends ListActivity {
     private ChatAdapter mChatAdapter;
     private SharedPreferences mSharedPrefs;
 
-    public Callback basicCallback;
     private String username;
     private String channel  = "MainChat";
 
@@ -85,7 +91,7 @@ public class MainActivity extends ListActivity {
         this.username = mSharedPrefs.getString(Constants.CHAT_USERNAME,"Anonymous");
         this.mListView = getListView();
         this.mChatAdapter = new ChatAdapter(this, new ArrayList<ChatMessage>());
-        this.mChatAdapter.userPresence(this.username, true); // Set user to online. Status changes handled in presence
+        this.mChatAdapter.userPresence(this.username, "join"); // Set user to online. Status changes handled in presence
         setupAutoScroll();
         this.mListView.setAdapter(mChatAdapter);
         setupListView();
@@ -182,22 +188,11 @@ public class MainActivity extends ListActivity {
      *   Finally, populate the listview with past messages from history
      */
     private void initPubNub(){
-        this.basicCallback = new Callback() {
-            @Override
-            public void successCallback(String channel, Object response) {
-                Log.d("PUBNUB", response.toString());
-            }
-
-            @Override
-            public void errorCallback(String channel, PubnubError error) {
-                Log.d("PUBNUB", error.toString());
-            }
-        };
-
         this.mPubNub = new Pubnub(Constants.PUBLISH_KEY, Constants.SUBSCRIBE_KEY);
         this.mPubNub.setUUID(this.username);
         subscribeWithPresence();
         history();
+        gcmRegister();
     }
 
     /**
@@ -212,7 +207,7 @@ public class MainActivity extends ListActivity {
             json.put("data", data);
         } catch (JSONException e) { e.printStackTrace(); }
 
-        this.mPubNub.publish(this.channel, json, this.basicCallback);
+        this.mPubNub.publish(this.channel, json, new BasicCallback());
     }
 
     /**
@@ -337,12 +332,12 @@ public class MainActivity extends ListActivity {
             public void connectCallback(String channel, Object message) {
                 Log.d("Subscribe","Connected! " + message.toString());
                 hereNow(false);
-                presenceSubscribe();
                 setStateLogin();
             }
         };
         try {
             mPubNub.subscribe(this.channel, subscribeCallback);
+            presenceSubscribe();
         } catch (PubnubException e){ e.printStackTrace(); }
     }
 
@@ -367,7 +362,7 @@ public class MainActivity extends ListActivity {
                         MainActivity.this.runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                mChatAdapter.userPresence(user, action.equals("join"));
+                                mChatAdapter.userPresence(user, action);
                                 mHereNow.setTitle(String.valueOf(occ));
                             }
                         });
@@ -552,7 +547,9 @@ public class MainActivity extends ListActivity {
     }
 
     /**
-     * GCM Functionality
+     * GCM Functionality.
+     * In order to use GCM Push notifications you need an API key and a Sender ID.
+     * Get your key and ID at - https://developers.google.com/cloud-messaging/
      */
 
     private void gcmRegister() {
@@ -597,7 +594,7 @@ public class MainActivity extends ListActivity {
             PnMessage message = new PnMessage(
                     this.mPubNub,
                     toUser,
-                    this.basicCallback,
+                    new BasicCallback(),
                     gcmMessage);
             message.put("pn_debug",true); // Subscribe to yourchannel-pndebug on console for reports
             message.publish();
@@ -638,7 +635,7 @@ public class MainActivity extends ListActivity {
     }
 
     private void sendRegistrationId(String regId) {
-        this.mPubNub.enablePushNotificationsOnChannel(this.username, regId, basicCallback);
+        this.mPubNub.enablePushNotificationsOnChannel(this.username, regId, new BasicCallback());
     }
 
     private class RegisterTask extends AsyncTask<Void, Void, String>{
