@@ -6,7 +6,7 @@ A simple chatting app that shows off the power of various PubNub features.
 
 ## Overview
 
-This Android chatting app allows a user to create a login identity that is then stored in `SharedPreferences` until logout. The initial chat room is titled `MainChat`, but a user can change chat rooms at any time. An integer in the menu bar indicates how many users are in the current chat room. If you click that `here now` number, a modal with all users in the room is displayed. Clicking on a user in the `here now` modal, or a message in the main chat, will display the login time of the corresponding user.
+This Android chatting app allows a user to create a login identity that is then stored in `SharedPreferences` until logout. The initial chat room is titled `MainChat`, but a user can change chat rooms at any time. An integer in the menu bar indicates how many users are in the current chat room. If you click that `here now` number, a modal with all users in the room is displayed. Clicking on a user in the `here now` modal will display the login time of the corresponding user. Clicking on a message in the chat room will send a poke to that user, notifying them that you are in the chat room.
 
 ## PubNub's Role
 
@@ -39,3 +39,9 @@ Presence updates the number of users currently in a room, but when you want to s
 <img src="img/pubchat_state.png" width="400">
 
 The PubNub [State API](http://www.pubnub.com/docs/android-java/presence) allows you to define state data on the current channel. You can attach an object to your UUID that is accessible to anyone on the channel. This chat app uses the state API to attach login time to all online users' UUIDs. When an item in the list view, or an online user from the `here now` modal is clicked, their login time is read from the state of the channel and displayed in a `Toast` message.
+
+### Push Notifications
+
+<img src="img/pubchat_push.png" width="400">
+
+PubNub makes push notifications easy. Simple enable push notifications on a channel and attach your GCM device ID to that channel and you are all set to receive pushes. When you tap a user's message in a chat room, a PubNub push notification is sent through GCM protocols to notify the user that you are waiting for them.
