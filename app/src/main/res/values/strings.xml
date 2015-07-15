@@ -4,6 +4,8 @@
     <string name="app_name">PubNub Chat</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
+    <string name="action_gcm_register">GCM Register</string>
+    <string name="action_gcm_unregister">GCM Unregister</string>
     <string name="title_activity_login">Login</string>
     <string name="login">Choose a username:</string>
     <string name="username">Username</string>
@@ -13,6 +15,8 @@
     <string name="send_message">Send a message...</string>
     <string name="action_sign_out">Sign Out</string>
     <string name="here_now">Here Now:</string>
+
+
 
 
 </resources>

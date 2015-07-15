@@ -2,18 +2,18 @@ package me.kevingleason.pubnubchat;
 
 import android.app.AlertDialog;
 import android.app.ListActivity;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.DataSetObserver;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.animation.AlphaAnimation;
-import android.view.animation.Animation;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -21,7 +21,12 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesUtil;
+import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.pubnub.api.Callback;
+import com.pubnub.api.PnGcmMessage;
+import com.pubnub.api.PnMessage;
 import com.pubnub.api.Pubnub;
 import com.pubnub.api.PubnubError;
 import com.pubnub.api.PubnubException;
@@ -30,6 +35,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -51,19 +57,29 @@ public class MainActivity extends ListActivity {
     private ChatAdapter mChatAdapter;
     private SharedPreferences mSharedPrefs;
 
+    public Callback basicCallback;
     private String username;
     private String channel  = "MainChat";
+
+    private GoogleCloudMessaging gcm;
+    private String gcmRegId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mSharedPrefs = getSharedPreferences(Constants.CHAT_PREFS,MODE_PRIVATE);
+        mSharedPrefs = getSharedPreferences(Constants.CHAT_PREFS, MODE_PRIVATE);
         if (!mSharedPrefs.contains(Constants.CHAT_USERNAME)){
             Intent toLogin = new Intent(this, LoginActivity.class);
             startActivity(toLogin);
             return;
+        }
+
+        Bundle extras = getIntent().getExtras();
+        if (extras != null){
+            Log.d("Main-bundle",extras.toString() + " Has Chat: " + extras.getString(Constants.CHAT_ROOM));
+            if (extras.containsKey(Constants.CHAT_ROOM)) this.channel = extras.getString(Constants.CHAT_ROOM);
         }
 
         this.username = mSharedPrefs.getString(Constants.CHAT_USERNAME,"Anonymous");
@@ -104,18 +120,20 @@ public class MainActivity extends ListActivity {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_here_now) {
-            hereNow(true);
-            return true;
+        switch(id){
+            case R.id.action_here_now:
+                hereNow(true);
+                return true;
+            case R.id.action_sign_out:
+                signOut();
+                return true;
+            case R.id.action_gcm_register:
+                gcmRegister();
+                return true;
+            case R.id.action_gcm_unregister:
+                gcmUnregister();
+                return true;
         }
-        if (id == R.id.action_sign_out) {
-            signOut();
-            return true;
-        }
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
         return super.onOptionsItemSelected(item);
     }
 
@@ -138,8 +156,8 @@ public class MainActivity extends ListActivity {
      *   history.
      */
     @Override
-    protected void onResume() {
-        super.onResume();
+    protected void onRestart() {
+        super.onRestart();
         if (this.mPubNub==null){
             initPubNub();
         } else {
@@ -164,6 +182,18 @@ public class MainActivity extends ListActivity {
      *   Finally, populate the listview with past messages from history
      */
     private void initPubNub(){
+        this.basicCallback = new Callback() {
+            @Override
+            public void successCallback(String channel, Object response) {
+                Log.d("PUBNUB", response.toString());
+            }
+
+            @Override
+            public void errorCallback(String channel, PubnubError error) {
+                Log.d("PUBNUB", error.toString());
+            }
+        };
+
         this.mPubNub = new Pubnub(Constants.PUBLISH_KEY, Constants.SUBSCRIBE_KEY);
         this.mPubNub.setUUID(this.username);
         subscribeWithPresence();
@@ -182,18 +212,7 @@ public class MainActivity extends ListActivity {
             json.put("data", data);
         } catch (JSONException e) { e.printStackTrace(); }
 
-        Callback callbacks = new Callback() {
-            @Override
-            public void successCallback(String channel, Object response) {
-                Log.d("PUBNUB",response.toString());
-            }
-
-            @Override
-            public void errorCallback(String channel, PubnubError error) {
-                Log.d("PUBNUB",error.toString());
-            }
-        };
-        this.mPubNub.publish(this.channel, json, callbacks);
+        this.mPubNub.publish(this.channel, json, this.basicCallback);
     }
 
     /**
@@ -438,7 +457,7 @@ public class MainActivity extends ListActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 ChatMessage chatMsg = mChatAdapter.getItem(position);
-                getStateLogin(chatMsg.getUsername());
+                sendNotification(chatMsg.getUsername());
             }
         });
     }
@@ -532,4 +551,139 @@ public class MainActivity extends ListActivity {
         alertDialog.show();
     }
 
+    /**
+     * GCM Functionality
+     */
+
+    private void gcmRegister() {
+        if (checkPlayServices()) {
+            gcm = GoogleCloudMessaging.getInstance(this);
+            try {
+                gcmRegId = getRegistrationId();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            if (gcmRegId.isEmpty()) {
+                registerInBackground();
+            } else {
+                Toast.makeText(this,"Registration ID already exists: " + gcmRegId,Toast.LENGTH_SHORT).show();
+            }
+        } else {
+            Log.e("GCM-register", "No valid Google Play Services APK found.");
+        }
+    }
+
+    private void gcmUnregister() {
+        new UnregisterTask().execute();
+    }
+
+    private void removeRegistrationId() {
+        SharedPreferences prefs = getSharedPreferences(Constants.CHAT_PREFS, Context.MODE_PRIVATE);
+
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.remove(Constants.GCM_REG_ID);
+        editor.apply();
+    }
+
+    public void sendNotification(String toUser) {
+        PnGcmMessage gcmMessage = new PnGcmMessage();
+        JSONObject json = new JSONObject();
+        try {
+            json.put(Constants.GCM_POKE_FROM, this.username);
+            json.put(Constants.GCM_CHAT_ROOM, this.channel);
+            gcmMessage.setData(json);
+
+            PnMessage message = new PnMessage(
+                    this.mPubNub,
+                    toUser,
+                    this.basicCallback,
+                    gcmMessage);
+            message.put("pn_debug",true); // Subscribe to yourchannel-pndebug on console for reports
+            message.publish();
+        }
+        catch (JSONException e) { e.printStackTrace(); }
+        catch (PubnubException e) { e.printStackTrace(); }
+    }
+
+    private boolean checkPlayServices() {
+        int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
+        if (resultCode != ConnectionResult.SUCCESS) {
+            if (GooglePlayServicesUtil.isUserRecoverableError(resultCode)) {
+                GooglePlayServicesUtil.getErrorDialog(resultCode, this, Constants.PLAY_SERVICES_RESOLUTION_REQUEST).show();
+            } else {
+                Log.e("GCM-check", "This device is not supported.");
+                finish();
+            }
+            return false;
+        }
+        return true;
+    }
+
+    private void registerInBackground() {
+        new RegisterTask().execute();
+    }
+
+    private void storeRegistrationId(String regId) {
+        SharedPreferences prefs = getSharedPreferences(Constants.CHAT_PREFS, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putString(Constants.GCM_REG_ID, regId);
+        editor.apply();
+    }
+
+
+    private String getRegistrationId() {
+        SharedPreferences prefs = getSharedPreferences(Constants.CHAT_PREFS, Context.MODE_PRIVATE);
+        return prefs.getString(Constants.GCM_REG_ID, "");
+    }
+
+    private void sendRegistrationId(String regId) {
+        this.mPubNub.enablePushNotificationsOnChannel(this.username, regId, basicCallback);
+    }
+
+    private class RegisterTask extends AsyncTask<Void, Void, String>{
+        @Override
+        protected String doInBackground(Void... params) {
+            String msg="";
+            try {
+                if (gcm == null) {
+                    gcm = GoogleCloudMessaging.getInstance(MainActivity.this);
+                }
+                gcmRegId = gcm.register(Constants.GCM_SENDER_ID);
+                msg = "Device registered, registration ID: " + gcmRegId;
+
+                sendRegistrationId(gcmRegId);
+
+                storeRegistrationId(gcmRegId);
+                Log.i("GCM-register", msg);
+            } catch (IOException e){
+                e.printStackTrace();
+            }
+            return msg;
+        }
+    }
+
+    private class UnregisterTask extends AsyncTask<Void, Void, Void> {
+        @Override
+        protected Void doInBackground(Void... params) {
+            try {
+                if (gcm == null) {
+                    gcm = GoogleCloudMessaging.getInstance(MainActivity.this);
+                }
+
+                // Unregister from GCM
+                gcm.unregister();
+
+                // Remove Registration ID from memory
+                removeRegistrationId();
+
+                // Disable Push Notification
+                mPubNub.disablePushNotificationsOnChannel(username, gcmRegId);
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+    }
 }
