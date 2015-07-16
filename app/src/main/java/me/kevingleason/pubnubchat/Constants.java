@@ -5,6 +5,7 @@ package me.kevingleason.pubnubchat;
  *
  * Constants used by this chatting application.
  * TODO: Replace PUBLISH_KEY and SUBSCRIBE_KEY with your personal keys.
+ * TODO: Register app for GCM and replace GCM_SENDER_ID
  */
 public class Constants {
     public static final String PUBLISH_KEY = "pub-c-7fad26fe-6c38-4940-b9c3-fbd19a9633af";
