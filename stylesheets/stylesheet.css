@@ -1,3 +1,17 @@
+#rtc-demo {
+	text-align: center;
+	padding: 10px 0;
+}
+
+#rtc-demo>p {
+	margin:2px;
+}
+
+.step-num{
+	font-size: 15px;
+	font-weight: bold;
+}
+
 * {
   box-sizing: border-box; }
 

@@ -8,6 +8,38 @@
     <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
     <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
+    <style>
+	    #download-btn {
+		    display: block;
+		    text-decoration: none;
+	    }
+	    
+	    #download-btn>div{
+		    border: 3px inset #ccc;
+		    margin: auto; 
+		    width: 160px;
+		    height: 30px;
+		    padding: 10px 15px;
+		    background: #FFFFFF;
+		    color: #FFFFFF;
+		    font-size: 16px;
+	    }
+	    
+	    #download-btn img{
+		    height:30px;
+		    margin: 0 5px;
+		    float: left;
+	    }
+	    
+	    #download, #qr {
+		    text-align: center;
+		    margin-top: 20px;
+	    }
+	    #download-box {
+		    text-align: center;
+		    margin: 0 auto;
+	    }
+    </style>
   </head>
   <body>
     <section class="page-header">
@@ -15,24 +47,45 @@
       <h2 class="project-tagline">An android chatting application that makes use of many PubNub features.</h2>
       <a href="https://github.com/GleasonK/pubnub-android-lolli-chat" class="btn">View on GitHub</a>
       <a href="https://github.com/GleasonK/pubnub-android-lolli-chat/zipball/master" class="btn">Download .zip</a>
-      <a href="https://github.com/GleasonK/pubnub-android-lolli-chat/tarball/master" class="btn">Download .tar.gz</a>
+      <a href="assets/app-release.apk" class="btn">Download Android .apk</a>
     </section>
 
     <section class="main-content">
-      <h3>
-<a id="pubchat" class="anchor" href="#pubchat" aria-hidden="true"><span class="octicon octicon-link"></span></a>PubChat</h3>
-
-<p>An Android chatting application build using many PubNub features. </p>
-
-<p>This demo shows you how to use:</p>
-
-<ul>
-<li>Basic Pub/Sub</li>
-<li>Channels for chat rooms</li>
-<li>Presence</li>
-<li>Push Notifications</li>
-<li>History and playback on channels</li>
-</ul>
+      <h3><a id="pubchat" class="anchor" href="#pubchat" aria-hidden="true"><span class="octicon octicon-link"></span></a>PubChat</h3>
+		
+		<p>An Android chatting application build using many PubNub features. </p>
+		<div id="download-box">
+			<div id="download">
+				<a id="download-btn" href="assets/app-release.apk">
+					<div style="width:200px; height:60px; background: #148484;">
+						<img src="assets/ic_launcher.png" align="middle">
+						<div style="float: left;margin-top: 6px; margin-left: 4px;">Download APK</div>
+					</div>
+				</a> <!-- Need to upload apk -->
+			</div>
+			<div id="qr">
+				<img style="height:200px;" src="assets/qr.jpg"> <br>
+				<i>Scan the QR Code or visit this page on your Android Device to download.</i>
+			</div>
+		</div>
+		
+		<div id="rtc-demo">
+		<p><b>To Download:</b></p>
+		<p><span class="step-num">1.</span><br>Visit this page on your Android device.</p>
+		<p><span class="step-num">2.</span><br>Enable third-party app installs on your device.</p>
+		<p><span class="step-num">Android 2.3 and earlier</span><br>Settings-&gt;Applications-&gt;Unknown Sources</p>
+		<p><span class="step-num">Android 4.0+</span><br>Settings-&gt;Security-&gt;Unknown Sources</p>
+		</div>
+		
+		<p>This demo shows you how to use:</p>
+		
+		<ul>
+		<li>Basic Pub/Sub</li>
+		<li>Channels for chat rooms</li>
+		<li>Presence</li>
+		<li>Push Notifications</li>
+		<li>History and playback on channels</li>
+		</ul>
 
       <footer class="site-footer">
         <span class="site-footer-owner"><a href="https://github.com/GleasonK/pubnub-android-lolli-chat">Pubnub-android-lolli-chat</a> is maintained by <a href="https://github.com/GleasonK">GleasonK</a>.</span>
@@ -41,6 +94,34 @@
       </footer>
 
     </section>
+    <script type="text/javascript">
+	var isMobile = {
+	    Android: function() {
+	        return /Android/i.test(navigator.userAgent);
+	    },
+	    BlackBerry: function() {
+	        return /BlackBerry/i.test(navigator.userAgent);
+	    },
+	    iOS: function() {
+	        return /iPhone|iPad|iPod/i.test(navigator.userAgent);
+	    },
+	    Windows: function() {
+	        return /IEMobile/i.test(navigator.userAgent);
+	    },
+	    any: function() {
+	        return (isMobile.Android() || isMobile.BlackBerry() || isMobile.iOS() || isMobile.Windows());
+	    }
+	};
+	
+	if (isMobile.Android()){ // Show download
+		document.getElementById("download").hidden=false;
+		document.getElementById("qr").hidden=true;
+	} else { // Show QR code
+		document.getElementById("download").hidden=true;
+		document.getElementById("qr").hidden=false;
+	}
+	
+	</script>
 
             <script type="text/javascript">
             var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
