@@ -1,10 +1,10 @@
 #rtc-demo {
-	text-align: center;
+	text-align: left;
 	padding: 10px 0;
 }
 
-#rtc-demo>p {
-	margin:2px;
+#rtc-demo p {
+	margin:5px;
 }
 
 .step-num{
