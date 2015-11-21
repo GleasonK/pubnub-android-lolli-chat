@@ -6,6 +6,8 @@ A simple chatting app that shows off the power of various PubNub features.
 
 ## Overview
 
+[Download APK Here](http://kevingleason.me/pubnub-android-lolli-chat/)
+
 This Android chatting app allows a user to create a login identity that is then stored in `SharedPreferences` until logout. The initial chat room is titled `MainChat`, but a user can change chat rooms at any time. An integer in the menu bar indicates how many users are in the current chat room. If you click that `here now` number, a modal with all users in the room is displayed. Clicking on a user in the `here now` modal will display the login time of the corresponding user. Clicking on a message in the chat room will send a poke to that user, notifying them that you are in the chat room.
 
 ## PubNub's Role
