@@ -393,20 +393,28 @@ public class MainActivity extends ListActivity {
                     final JSONArray messages = json.getJSONArray(0);
                     final List<ChatMessage> chatMsgs = new ArrayList<ChatMessage>();
                     for (int i = 0; i < messages.length(); i++) {
-                        JSONObject jsonMsg = messages.getJSONObject(i).getJSONObject("data");
-                        String name = jsonMsg.getString(Constants.JSON_USER);
-                        String msg  = jsonMsg.getString(Constants.JSON_MSG);
-                        long time   = jsonMsg.getLong(Constants.JSON_TIME);
-                        ChatMessage chatMsg = new ChatMessage(name, msg, time);
-                        chatMsgs.add(chatMsg);
+                        try {
+                            if (!messages.getJSONObject(i).has("data")) continue;
+                            JSONObject jsonMsg = messages.getJSONObject(i).getJSONObject("data");
+                            String name = jsonMsg.getString(Constants.JSON_USER);
+                            String msg = jsonMsg.getString(Constants.JSON_MSG);
+                            long time = jsonMsg.getLong(Constants.JSON_TIME);
+                            ChatMessage chatMsg = new ChatMessage(name, msg, time);
+                            chatMsgs.add(chatMsg);
+                        } catch (JSONException e) { // Handle errors silently
+                            Log.d("History", "JSONException");
+                        }
                     }
+
                     MainActivity.this.runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
                             mChatAdapter.setMessages(chatMsgs);
                         }
                     });
-                } catch (JSONException e){ e.printStackTrace(); }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
             }
 
             @Override

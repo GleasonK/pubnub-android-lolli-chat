@@ -8,7 +8,7 @@ package me.kevingleason.pubnubchat;
  * TODO: Register app for GCM and replace GCM_SENDER_ID
  */
 public class Constants {
-    public static final String PUBLISH_KEY = "pub-c-7fad26fe-6c38-4940-b9c3-fbd19a9633af";
+    public static final String PUBLISH_KEY   = "pub-c-7fad26fe-6c38-4940-b9c3-fbd19a9633af";
     public static final String SUBSCRIBE_KEY = "sub-c-30c17e1a-0007-11e5-a8ef-0619f8945a4f";
 
     public static final String CHAT_PREFS    = "me.kevingleason.SHARED_PREFS";
