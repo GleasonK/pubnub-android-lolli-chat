@@ -231,7 +231,8 @@ public class MainActivity extends ListActivity {
                     MainActivity.this.runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            mHereNow.setTitle(String.valueOf(occ));
+                            if (mHereNow != null)
+                                mHereNow.setTitle(String.valueOf(occ));
                             mChatAdapter.setOnlineNow(usersOnline);
                             if (displayUsers)
                                 alertHereNow(usersOnline);
@@ -384,7 +385,7 @@ public class MainActivity extends ListActivity {
      * Get last 100 messages sent on current channel from history.
      */
     public void history(){
-        this.mPubNub.history(this.channel,100,true,new Callback() {
+        this.mPubNub.history(this.channel,100,false,new Callback() {
             @Override
             public void successCallback(String channel, final Object message) {
                 try {
@@ -402,13 +403,14 @@ public class MainActivity extends ListActivity {
                             ChatMessage chatMsg = new ChatMessage(name, msg, time);
                             chatMsgs.add(chatMsg);
                         } catch (JSONException e) { // Handle errors silently
-                            Log.d("History", "JSONException");
+                            e.printStackTrace();
                         }
                     }
 
                     MainActivity.this.runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
+                            Toast.makeText(MainActivity.this,"RUNNIN",Toast.LENGTH_SHORT).show();
                             mChatAdapter.setMessages(chatMsgs);
                         }
                     });
